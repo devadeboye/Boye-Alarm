@@ -80,10 +80,6 @@ class Alarm(Reminder):
         self.__ring_time()
 
 
-
-
-
-
 class my_thread(threading.Thread):
     def __init__(self, g, t, f='m', l=None):
         threading.Thread.__init__(self)
