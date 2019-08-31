@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # test threading
     thread1 = my_thread('10 secs test', 10, 's')
-    thread2 = my_thread('20 secs test', 20, 's')
+    thread2 = my_thread('20 secs test', 30, 's')
     # start the thread
     thread1.start()
     thread2.start()

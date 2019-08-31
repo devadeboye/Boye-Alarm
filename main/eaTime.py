@@ -2,7 +2,7 @@ import time
 import math
 import pdb
 
-def count_down(t, f = 'm', md = 's'):
+def count_down(t, f = 'm', md = 'v'):
     """
         counts down from the given time. takes 3 argument.
         Takes t, f, and md as arguments
@@ -175,6 +175,39 @@ class Appointment:
         self._goal = g
         self._dtime = t # due time
         self._location = l
+
+
+class Reminder(Appointment):
+    """
+
+    """
+    def __init__(self, g, t, l = None):
+        self.__goal = g
+        self.__dtime = t # due time
+        self.__location = l
+    
+    # ----------- setters ---------
+    def set_time(self, nt):
+        """ nt is new time """
+        self.__dtime = nt
+    
+    def set_goal(self, ng):
+        """ ng is new goal """
+        self.__goal = ng
+
+    def set_loc(self, nl):
+        """ nl is new location """
+        self.__location = nl
+
+    # ----------- getters ------------
+    def get_time(self):
+        return self.__dtime
+
+    def get_goal(self):
+        return self.__goal
+
+    def get_loc(self):
+        return self.__location
 
          
 
