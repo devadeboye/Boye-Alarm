@@ -2,6 +2,9 @@ import time
 from eaTime import Timing
 import threading
 from playsound import playsound
+import json
+import sqlite3
+import os
 
 class Alarm:
     """
@@ -110,6 +113,15 @@ class Alarm:
 
 
 class AlarmThread(threading.Thread):
+    """
+    Makes running the Alarm class possible. it accepts
+    two arguments:
+
+    PARAMETERS
+    t = time alarm should sound
+    title = title or name for the task/alarm
+    """
+
     def __init__(self, t, title):
         """
         constructor for AlarmThread class.
@@ -126,12 +138,35 @@ class AlarmThread(threading.Thread):
         print(f'exiting {self.title}!')
 
 
-class Timer:
+def add_alarm(t,title='nil'):
     """
-    class Timer defines a countdown timer
+    collects all necessary info needed to set the
+    alarm from the user.
+
+    PARAMETERS
+    t = time alarm should sound
+    title = title or name for the task/alarm
     """
-    def __init__(self):
-        pass
+    try:
+        # open file for reading
+        fr = open('alarms.json', 'r')
+        # load data
+        alarm_data = json.load(fr)
+
+        # add item to the dict
+        alarm_data[t] = title
+        # open file to write changes
+        fw = open('alarms.json', 'w')
+
+        # write the changes to file
+        json.dump(alarm_data, fw, indent=4)
+        # close file
+        fw.close()
+
+    except FileNotFoundError:
+        fw = open('alarms.json', 'w')
+        json.dump({t:title}, fw, indent=4)
+        fw.close()
 
 
 
@@ -139,6 +174,7 @@ class Timer:
 
 # ---------------- test -------------
 if __name__ == "__main__":
-    AlarmThread('11:60', 't1').start()
-    AlarmThread('11:21', 't2').start()
+    #AlarmThread('11:60', 't1').start()
+    #AlarmThread('11:21', 't2').start()
+    add_alarm('2:30','cook')
    

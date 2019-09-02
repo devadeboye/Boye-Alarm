@@ -1,6 +1,7 @@
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
+import json
 
 class MyWindow(Gtk.Window):
     def __init__(self):
@@ -14,23 +15,31 @@ class MyWindow(Gtk.Window):
         # create the stack
         stack = Gtk.Stack()
         #self.add(self.stack)
-
-        # ----------- PAGE 1 ---------------\
-        # sample content which i will later delete
-        l = Gtk.Label()
-        l.set_justify(Gtk.Justification.LEFT)
-        l.set_markup("<span size='x-large'><b>5:00</b></span>\n<small>Go to the pub</small>")
-
-        r = Gtk.Label()
-        r.set_justify(Gtk.Justification.LEFT)
-        r.set_markup("<span size='x-large'><b>10:20</b></span>\n<small>Take the Berger route</small>")
-
+        # create page 1
         self.page1 = Gtk.ListBox()
         # set border width of the 1st page
         self.page1.set_border_width(10)
-        # add content to the listbox
-        self.page1.add(l)
-        self.page1.add(r)
+
+        # ----------- PAGE 1 ---------------
+        try:
+            # open file for reading
+            fr = open('alarms.json', 'r')
+            # load data
+            self.alarm_data = json.load(fr)
+        except FileNotFoundError:
+            print('wahala here!') # display that no alarm is set yet
+
+        #iterate over the content of the dictionary
+        for k, v in self.alarm_data.items():
+            # sample content which i will later delete
+            l = Gtk.Label()
+            l.set_justify(Gtk.Justification.LEFT)
+            l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
+            # add content to the listbox
+            self.page1.add(l)
+
+        
+        
 
         # add page 1 to stack
         stack.add_titled(self.page1, 'Alarm', 'Alarm')
