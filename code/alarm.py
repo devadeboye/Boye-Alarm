@@ -19,19 +19,16 @@ class Alarm:
 
         # when an integer is passed as a time
         except AttributeError:
-            raise ValueError("Time (t) must be a string"+\
-                ", so enclose the time in '' separating"+\
-                    " the hours and mins with a colon "+\
-                        "(:). e.g '12:00'")
+            print("Time (t) must be a string")
 
         # when time is not enclosed in a quote
         except SyntaxError:
-            raise ValueError("invalid input! time(t) "+\
+            print("invalid input! time(t) "+\
                 "and title must be a string.")
 
         # when the title is not surrounded with a quote
         except NameError:
-            raise ValueError('title must be a string!')
+            print('title must be a string!')
 
     def proc(self):
         """
@@ -43,11 +40,10 @@ class Alarm:
 
         # compare current time with the entered time
         #
-        # if min or secs > 59
-        if int(self.tm[1]) > 59:
-            raise ValueError("invalid time!")
+        # min or secs must be < 60
+        assert(int(self.tm[1]) < 60)
         # if current time (h) > due time
-        elif now[3] > int(self.tm[0]):
+        if now[3] > int(self.tm[0]):
             raise ValueError("invalid time! That time "+\
                 "has passed.")
 
@@ -83,7 +79,7 @@ class Alarm:
             st = Timing().sm(sleep_dur, r='t')
             # Tell the user when the alarm will sound
             print(f'Alarm will sound in {st[0]} min(s)'+\
-                ' {st[1]} seconds time')
+                f' {st[1]} seconds time')
             
         # sleep duration > 3600
         elif sleep_dur >= 3600:
@@ -101,15 +97,6 @@ class Alarm:
         ring if current time is equal to due_time
         """
         playsound('old-fashioned-school-bell-daniel_simon.wav')
-
-    def start(self):
-        """
-        a method to start the alarm
-        """
-        # process the time
-        self.proc()
-        # call the ringer
-        self.ring()
 
 
 class AlarmThread(threading.Thread):
@@ -133,9 +120,16 @@ class AlarmThread(threading.Thread):
         self.title = title
 
     def run(self):
-        print(f'starting {self.title}!')
-        Alarm(self.time, self.title).start()
-        print(f'exiting {self.title}!')
+        try:
+            print(f'starting {self.title}!')
+            a = Alarm(self.time, self.title)
+            # process the time
+            a.proc()
+            # call the ringer
+            a.ring()
+            print(f'exiting {self.title}!')
+        except Exception as e:
+            print(e)
 
 
 def add_alarm(t,title='nil'):
@@ -175,6 +169,13 @@ def add_alarm(t,title='nil'):
 # ---------------- test -------------
 if __name__ == "__main__":
     #AlarmThread('11:60', 't1').start()
-    #AlarmThread('11:21', 't2').start()
-    add_alarm('2:30','cook')
-   
+    #AlarmThread('17:19', 't2').start()
+    #add_alarm('5:00','wake up')
+    try:
+        AlarmThread('17:00', 't2').start()
+    except AssertionError:
+        print('oh no!')
+    
+    
+    #AlarmThread('18:19', 't1').start()
+    #AlarmThread('18:18', 't2').start()

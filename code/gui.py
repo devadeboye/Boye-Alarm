@@ -2,6 +2,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 import json
+import alarm
 
 class MyWindow(Gtk.Window):
     def __init__(self):
@@ -25,26 +26,71 @@ class MyWindow(Gtk.Window):
             # open file for reading
             fr = open('alarms.json', 'r')
             # load data
-            self.alarm_data = json.load(fr)
+            alarm_data = json.load(fr)
+            fr.close()
+            # contains invalid times
+            temp = []
+
+            # if no alarm set
+            if len(alarm_data) < 1:
+                # create label for the error message
+                s = Gtk.Label()
+                s.set_justify(Gtk.Justification.LEFT)
+                
+                # error message
+                msg = "you have set no alarm!"
+                # style the text using pango markup
+                s.set_markup(f"<span size='small'>{msg}</span>")
+                
+                # add content to the listbox
+                self.page1.add(s)
+
+            #iterate over the content of the dictionary
+            for k, v in alarm_data.items():
+                try:
+                    # set the alarm
+                    assert(alarm.AlarmThread(k,v).start())
+                    # create a label for each entry
+                    l = Gtk.Label()
+
+                    # left justification
+                    l.set_justify(Gtk.Justification.LEFT)
+
+                    # style the text using pango markup
+                    l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
+                    
+                    # add content to the listbox
+                    self.page1.add(l)
+                except:
+                    temp.append(k)
+                    print('Heck NOoooo!')
+
+            # remove invalid/ expired entries
+            for el in temp:
+                del(alarm_data[el])
+            # open file for writing
+            fw = open('alarms.json', 'w')
+            json.dump(alarm_data, fw, indent=4)
+            fw.close()
+            
+
         except FileNotFoundError:
-            print('wahala here!') # display that no alarm is set yet
-
-        #iterate over the content of the dictionary
-        for k, v in self.alarm_data.items():
-            # sample content which i will later delete
-            l = Gtk.Label()
-            l.set_justify(Gtk.Justification.LEFT)
-            l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
+            # create label for the error message
+            r = Gtk.Label()
+            r.set_justify(Gtk.Justification.LEFT)
+            
+            # error message
+            msg = "You are yet to set an alarm"
+            # style the text using pango markup
+            r.set_markup(f"<span size='small'>{msg}</span>")
+            
             # add content to the listbox
-            self.page1.add(l)
-
-        
-        
+            self.page1.add(r)
 
         # add page 1 to stack
         stack.add_titled(self.page1, 'Alarm', 'Alarm')
 
-        # create page 2
+        #-------------- PAGE 2 ---------------------
         self.page2 = Gtk.Box()
          # set border width of the 2nd page
         self.page2.set_border_width(10)
