@@ -8,6 +8,10 @@ class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Pagus")
         self.set_border_width(3)
+        # set windows default size
+        self.set_default_size(500, 200)
+        # make window unresizeable
+        self.set_resizable(False)
 
         # container to hold all item
         main_container = Gtk.HBox()
@@ -30,7 +34,7 @@ class MyWindow(Gtk.Window):
         self.sidebar.add(add_but)
         self.sidebar.attach(about, 0, 1, 1, 1)
         # add sidebar to main_container
-        main_container.pack_start(self.sidebar, True, True, 0)
+        main_container.pack_start(self.sidebar, False, True, 0)
         
         # page to display list of alarms
         self.alarm_page = Gtk.ListBox()
@@ -45,7 +49,7 @@ class MyWindow(Gtk.Window):
             alarm_data = json.load(fr)
             fr.close()
             # contains invalid times
-            temp = []
+            trash_can = []
 
             # if no alarm set
             if len(alarm_data) < 1:
@@ -66,7 +70,7 @@ class MyWindow(Gtk.Window):
                 for k, v in alarm_data.items():
                     try:
                         # try to set each alarm
-                        alarm.AlarmThread(k,v).start()
+                        assert(alarm.AlarmThread(k,v).start())
                         # create a label for each entry
                         l = Gtk.Label()
 
@@ -79,18 +83,33 @@ class MyWindow(Gtk.Window):
                         # add content to the listbox
                         self.alarm_page.add(l)
                     # if time is invalid
-                    except Exception as error:
-                        temp.append(k)
-                        print(error)
-                        #print('Heck NOoooo!')
+                    except AssertionError:
+                        # add invalid ones to trash can
+                        trash_can.append(k)
+                        print(f'{k} added to trash can')
 
                 # remove invalid/ expired entries
-                for el in temp:
+                for el in trash_can:
                     del(alarm_data[el])
                 # open file for writing
                 fw = open('record.json', 'w')
                 json.dump(alarm_data, fw, indent=4)
                 fw.close()
+
+                # handle condition when alarm list becomes
+                # empty due to removal
+                if len(alarm_data) < 1:
+                    # create label for the error message
+                    s = Gtk.Label()
+                    s.set_justify(Gtk.Justification.LEFT)
+                    
+                    # error message
+                    msg = "you have set no alarm!"
+                    # style the text using pango markup
+                    s.set_markup(f"<span size='small'>{msg}</span>")
+                    
+                    # add content to the listbox
+                    self.alarm_page.add(s)
             
 
         except FileNotFoundError:
