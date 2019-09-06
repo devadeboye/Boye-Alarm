@@ -147,8 +147,22 @@ class MyWindow(Gtk.Window):
         cont.attach(submit, 0, 2, 1, 1)
 
 
-    def about_app(self):
+    def about_app(self, widget):
         info = Gtk.AboutDialog()
+        info.set_program_name('Pagus')
+        info.set_version('1.0')
+        info.set_comments ('An alarm clock app for PC')
+        info.set_copyright('Copyright © 2019 Emmanuel Adeboye')
+        info.set_authors (['Adeboye Emmanuel'])
+        info.add_credit_section ('Appreciation',\
+            ['Adeboye Elijah',
+            'Adeboye Cecilia',
+            'Kayode Okanlawon',
+            'Oniyide Hanameel'])
+
+        # start the dailog
+        info.run()
+        info.destroy()
 
 
 # create an instance of my window
