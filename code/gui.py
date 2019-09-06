@@ -18,6 +18,9 @@ class MyWindow(Gtk.Window):
         # add container to main window
         self.add(self.main_container)
 
+        # variable to hold time and title of alarm
+        self.title = self.time = self.time_content = self.title_content = None
+
 
         #-------- SIDE BAR -----------
         # grid to hold sidebar buttons
@@ -128,23 +131,36 @@ class MyWindow(Gtk.Window):
         # add page 1 to stack ---->
         self.main_container.pack_start(self.alarm_page, True, True, 0)
 
+    def add_alarm(self, widget):
+        # get the content of the entry widget
+        self.time_content = self.time.get_text()
+        # get the content of the entry widget
+        self.title_content = self.title.get_text()
+        alarm.add_alarm(self.time_content, self.title_content)
 
     def show_add_page(self, widget):
+        # displays a popover
         pop = Gtk.Popover()
+        # create a grid 
         cont = Gtk.Grid()
+        # label for the text box
         time_label = Gtk.Label('Time')
-        time = Gtk.Entry()
+        # textbox to enter time
+        self.time = Gtk.Entry()
+        
 
+        # label for the title text box
         title_label = Gtk.Label('Title')
-        title = Gtk.Entry()
-
+        # textbox to enter title of the alarm
+        self.title = Gtk.Entry()
+        
         submit = Gtk.Button(label='submit')
-        #submit.connect('clicked', alarm.add_alarm(time, title))
+        submit.connect('clicked', self.add_alarm)
         
         cont.add(time_label)
-        cont.attach(time, 1, 0, 1, 1)
+        cont.attach(self.time, 1, 0, 1, 1)
         cont.attach(title_label, 0, 1, 1, 1)
-        cont.attach(title, 1, 1, 1, 1)
+        cont.attach(self.title, 1, 1, 1, 1)
         cont.attach(submit, 0, 2, 1, 1)
         pop.add(cont)
 
