@@ -143,14 +143,14 @@ def add_alarm(t,title='nil'):
     """
     try:
         # open file for reading
-        fr = open('alarms.json', 'r')
+        fr = open('record.json', 'r')
         # load data
         alarm_data = json.load(fr)
 
         # add item to the dict
         alarm_data[t] = title
         # open file to write changes
-        fw = open('alarms.json', 'w')
+        fw = open('record.json', 'w')
 
         # write the changes to file
         json.dump(alarm_data, fw, indent=4)
@@ -158,7 +158,7 @@ def add_alarm(t,title='nil'):
         fw.close()
 
     except FileNotFoundError:
-        fw = open('alarms.json', 'w')
+        fw = open('record.json', 'w')
         json.dump({t:title}, fw, indent=4)
         fw.close()
 
@@ -170,12 +170,9 @@ def add_alarm(t,title='nil'):
 if __name__ == "__main__":
     #AlarmThread('11:60', 't1').start()
     #AlarmThread('17:19', 't2').start()
-    #add_alarm('5:00','wake up')
-    try:
-        AlarmThread('17:00', 't2').start()
+    add_alarm("9:40","wake up")
+    """try:
+        AlarmThread('20:35', 'cooking').start()
     except AssertionError:
-        print('oh no!')
+        print('oh no!')"""
     
-    
-    #AlarmThread('18:19', 't1').start()
-    #AlarmThread('18:18', 't2').start()

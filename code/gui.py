@@ -9,22 +9,38 @@ class MyWindow(Gtk.Window):
         Gtk.Window.__init__(self, title="Pagus")
         self.set_border_width(3)
 
-        # create the stack container
-        stack_cont = Gtk.VBox()
+        # container to hold all item
+        main_container = Gtk.HBox()
         # add container to main window
-        self.add(stack_cont)
-        # create the stack
-        stack = Gtk.Stack()
-        #self.add(self.stack)
-        # create page 1
-        self.page1 = Gtk.ListBox()
+        self.add(main_container)
+
+
+        #-------- SIDE BAR -----------
+        # grid to hold sidebar buttons
+        self.sidebar = Gtk.Grid()
+        # button to add an alarm
+        add_but = Gtk.Button(label='Add Alarm')
+        # connect button to its command function
+        add_but.connect('clicked', self.show_add_page)
+        # button to lauch info about the app
+        about = Gtk.Button(label='About')
+        about.connect('clicked', self.about_app)
+
+        # add both buttons to grid
+        self.sidebar.add(add_but)
+        self.sidebar.attach(about, 0, 1, 1, 1)
+        # add sidebar to main_container
+        main_container.pack_start(self.sidebar, True, True, 0)
+        
+        # page to display list of alarms
+        self.alarm_page = Gtk.ListBox()
         # set border width of the 1st page
-        self.page1.set_border_width(10)
+        self.alarm_page.set_border_width(10)
 
         # ----------- PAGE 1 ---------------
         try:
             # open file for reading
-            fr = open('alarms.json', 'r')
+            fr = open("record.json", "r")
             # load data
             alarm_data = json.load(fr)
             fr.close()
@@ -43,35 +59,38 @@ class MyWindow(Gtk.Window):
                 s.set_markup(f"<span size='small'>{msg}</span>")
                 
                 # add content to the listbox
-                self.page1.add(s)
+                self.alarm_page.add(s)
 
-            #iterate over the content of the dictionary
-            for k, v in alarm_data.items():
-                try:
-                    # set the alarm
-                    assert(alarm.AlarmThread(k,v).start())
-                    # create a label for each entry
-                    l = Gtk.Label()
+            else:
+                #iterate over the alarm dictionary
+                for k, v in alarm_data.items():
+                    try:
+                        # try to set each alarm
+                        alarm.AlarmThread(k,v).start()
+                        # create a label for each entry
+                        l = Gtk.Label()
 
-                    # left justification
-                    l.set_justify(Gtk.Justification.LEFT)
+                        # left justification
+                        l.set_justify(Gtk.Justification.LEFT)
 
-                    # style the text using pango markup
-                    l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
-                    
-                    # add content to the listbox
-                    self.page1.add(l)
-                except:
-                    temp.append(k)
-                    print('Heck NOoooo!')
+                        # style the text using pango markup
+                        l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
+                        
+                        # add content to the listbox
+                        self.alarm_page.add(l)
+                    # if time is invalid
+                    except Exception as error:
+                        temp.append(k)
+                        print(error)
+                        #print('Heck NOoooo!')
 
-            # remove invalid/ expired entries
-            for el in temp:
-                del(alarm_data[el])
-            # open file for writing
-            fw = open('alarms.json', 'w')
-            json.dump(alarm_data, fw, indent=4)
-            fw.close()
+                # remove invalid/ expired entries
+                for el in temp:
+                    del(alarm_data[el])
+                # open file for writing
+                fw = open('record.json', 'w')
+                json.dump(alarm_data, fw, indent=4)
+                fw.close()
             
 
         except FileNotFoundError:
@@ -85,22 +104,32 @@ class MyWindow(Gtk.Window):
             r.set_markup(f"<span size='small'>{msg}</span>")
             
             # add content to the listbox
-            self.page1.add(r)
+            self.alarm_page.add(r)
 
-        # add page 1 to stack
-        stack.add_titled(self.page1, 'Alarm', 'Alarm')
+        # add page 1 to stack ---->
+        main_container.pack_start(self.alarm_page, True, True, 0)
 
-        #-------------- PAGE 2 ---------------------
-        self.page2 = Gtk.Box()
-         # set border width of the 2nd page
-        self.page2.set_border_width(10)
-        stack.add_titled(self.page2, 'About','About')
 
-        stack_switcher = Gtk.StackSwitcher()
-        stack_switcher.set_stack(stack)
+    def show_add_page(self):
+        cont = Gtk.Grid()
+        time_label = Gtk.Label('Time')
+        time = Gtk.Entry()
 
-        stack_cont.pack_start(stack_switcher, False, False, 0)
-        stack_cont.pack_start(stack, False, False, 0)
+        title_label = Gtk.Label('Title')
+        title = Gtk.Entry()
+
+        submit = Gtk.Button(label='submit')
+        #submit.connect('clicked', alarm.add_alarm(time, title))
+        
+        cont.add(time_label)
+        cont.attach(time, 1, 0, 1, 1)
+        cont.attach(title_label, 0, 1, 1, 1)
+        cont.attach(title, 1, 1, 1, 1)
+        cont.attach(submit, 0, 2, 1, 1)
+
+
+    def about_app(self):
+        info = Gtk.AboutDialog()
 
 
 # create an instance of my window
