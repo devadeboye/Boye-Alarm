@@ -14,27 +14,27 @@ class MyWindow(Gtk.Window):
         self.set_resizable(False)
 
         # container to hold all item
-        main_container = Gtk.HBox()
+        self.main_container = Gtk.HBox()
         # add container to main window
-        self.add(main_container)
+        self.add(self.main_container)
 
 
         #-------- SIDE BAR -----------
         # grid to hold sidebar buttons
         self.sidebar = Gtk.Grid()
         # button to add an alarm
-        add_but = Gtk.Button(label='Add Alarm')
+        self.add_but = Gtk.Button(label='Add Alarm')
         # connect button to its command function
-        add_but.connect('clicked', self.show_add_page)
+        self.add_but.connect('clicked', self.show_add_page)
         # button to lauch info about the app
-        about = Gtk.Button(label='About')
-        about.connect('clicked', self.about_app)
+        self.about = Gtk.Button(label='About')
+        self.about.connect('clicked', self.about_app)
 
         # add both buttons to grid
-        self.sidebar.add(add_but)
-        self.sidebar.attach(about, 0, 1, 1, 1)
+        self.sidebar.add(self.add_but)
+        self.sidebar.attach(self.about, 0, 1, 1, 1)
         # add sidebar to main_container
-        main_container.pack_start(self.sidebar, False, True, 0)
+        self.main_container.pack_start(self.sidebar, False, True, 0)
         
         # page to display list of alarms
         self.alarm_page = Gtk.ListBox()
@@ -126,10 +126,11 @@ class MyWindow(Gtk.Window):
             self.alarm_page.add(r)
 
         # add page 1 to stack ---->
-        main_container.pack_start(self.alarm_page, True, True, 0)
+        self.main_container.pack_start(self.alarm_page, True, True, 0)
 
 
-    def show_add_page(self):
+    def show_add_page(self, widget):
+        pop = Gtk.Popover()
         cont = Gtk.Grid()
         time_label = Gtk.Label('Time')
         time = Gtk.Entry()
@@ -145,6 +146,11 @@ class MyWindow(Gtk.Window):
         cont.attach(title_label, 0, 1, 1, 1)
         cont.attach(title, 1, 1, 1, 1)
         cont.attach(submit, 0, 2, 1, 1)
+        pop.add(cont)
+
+        pop.set_relative_to(self.add_but)
+        pop.show_all()
+        pop.popup()
 
 
     def about_app(self, widget):
@@ -154,7 +160,7 @@ class MyWindow(Gtk.Window):
         info.set_comments ('An alarm clock app for PC')
         info.set_copyright('Copyright © 2019 Emmanuel Adeboye')
         info.set_authors (['Adeboye Emmanuel'])
-        info.add_credit_section ('Appreciation',\
+        info.add_credit_section ('Appreciation:',\
             ['Adeboye Elijah',
             'Adeboye Cecilia',
             'Kayode Okanlawon',
