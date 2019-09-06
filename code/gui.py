@@ -171,6 +171,7 @@ class MyWindow(Gtk.Window):
 
     def about_app(self, widget):
         info = Gtk.AboutDialog()
+        info.set_transient_for(self)
         info.set_program_name('Pagus')
         info.set_version('1.0')
         info.set_comments ('An alarm clock app for PC')
