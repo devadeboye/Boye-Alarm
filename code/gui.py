@@ -19,154 +19,45 @@ class MyWindow(Gtk.Window):
         self.add(self.main_container)
 
         # variable to hold time and title of alarm
-        self.title = self.time = self.time_content = self.title_content = None
-
-
-        #-------- SIDE BAR -----------
-        # grid to hold sidebar buttons
-        self.sidebar = Gtk.Grid()
-        # button to add an alarm
-        self.add_but = Gtk.Button(label='Add Alarm')
-        # connect button to its command function
-        self.add_but.connect('clicked', self.show_add_page)
-        # button to lauch info about the app
-        self.about = Gtk.Button(label='About')
-        self.about.connect('clicked', self.about_app)
-
-        # add both buttons to grid
-        self.sidebar.add(self.add_but)
-        self.sidebar.attach(self.about, 0, 1, 1, 1)
-        # add sidebar to main_container
-        self.main_container.pack_start(self.sidebar, False, True, 0)
+        self.title = self.time = self.time_content =\
+            self.title_content = None
         
-        # page to display list of alarms
-        self.alarm_page = Gtk.ListBox()
-        # set border width of the 1st page
-        self.alarm_page.set_border_width(10)
+        #/////////////////////////////////////////////
 
-        # ----------- PAGE 1 ---------------
-        try:
-            # open file for reading
-            fr = open("record.json", "r")
-            # load data
-            alarm_data = json.load(fr)
-            fr.close()
-            # contains invalid times
-            trash_can = []
+        # TASK ADDING ALGORITHM
+        # ------------------------ 
+        # - accept the parameters
+        # - if parameters are valid:
+        #     - set the alarm with the parameters
+        #     - add the alarm info to the gui
+        #     - add the alarm info to the db
+        # - else:
+        #     - raise an exception via a popup box stating
+        #       the error.
+        # 
+        # 
+        # ALGORITHM TO CONTROL WHAT TO DO ON LAUNCH
+        # -----------------------------------------
+        # - if there are item in the db:
+        #     - load them
+        #     - set alarm for them
+        #     - add their alarm info to the gui
+        # - else:
+        #     - raise alarm empty error as a popup
+        # 
+        # 
+        # ALARM TRIGGER ALGORITHM
+        # - if time == specified time:
+        #     - sound the alarm
+        #     - remove alarm info from gui
+        #     - remove alarm record from db
+        # - else:
+        #     - sleep till its time 
 
-            # if no alarm set
-            if len(alarm_data) < 1:
-                # create label for the error message
-                s = Gtk.Label()
-                s.set_justify(Gtk.Justification.LEFT)
-                
-                # error message
-                msg = "you have set no alarm!"
-                # style the text using pango markup
-                s.set_markup(f"<span size='small'>{msg}</span>")
-                
-                # add content to the listbox
-                self.alarm_page.add(s)
 
-            else:
-                #iterate over the alarm dictionary
-                for k, v in alarm_data.items():
-                    try:
-                        # try to set each alarm
-                        assert(alarm.AlarmThread(k,v).start())
-                        # create a label for each entry
-                        l = Gtk.Label()
+        #/////////////////////////////////////////////
 
-                        # left justification
-                        l.set_justify(Gtk.Justification.LEFT)
-
-                        # style the text using pango markup
-                        l.set_markup(f"<span size='x-large'><b>{k}</b></span>\n<small>{v}</small>")
-                        
-                        # add content to the listbox
-                        self.alarm_page.add(l)
-                    # if time is invalid
-                    except AssertionError:
-                        # add invalid ones to trash can
-                        trash_can.append(k)
-                        print(f'{k} added to trash can')
-
-                # remove invalid/ expired entries
-                for el in trash_can:
-                    del(alarm_data[el])
-                # open file for writing
-                fw = open('record.json', 'w')
-                json.dump(alarm_data, fw, indent=4)
-                fw.close()
-
-                # handle condition when alarm list becomes
-                # empty due to removal
-                if len(alarm_data) < 1:
-                    # create label for the error message
-                    s = Gtk.Label()
-                    s.set_justify(Gtk.Justification.LEFT)
-                    
-                    # error message
-                    msg = "you have set no alarm!"
-                    # style the text using pango markup
-                    s.set_markup(f"<span size='small'>{msg}</span>")
-                    
-                    # add content to the listbox
-                    self.alarm_page.add(s)
-            
-
-        except FileNotFoundError:
-            # create label for the error message
-            r = Gtk.Label()
-            r.set_justify(Gtk.Justification.LEFT)
-            
-            # error message
-            msg = "You are yet to set an alarm"
-            # style the text using pango markup
-            r.set_markup(f"<span size='small'>{msg}</span>")
-            
-            # add content to the listbox
-            self.alarm_page.add(r)
-
-        # add page 1 to stack ---->
-        self.main_container.pack_start(self.alarm_page, True, True, 0)
-
-    def add_alarm(self, widget):
-        # get the content of the entry widget
-        self.time_content = self.time.get_text()
-        # get the content of the entry widget
-        self.title_content = self.title.get_text()
-        alarm.add_alarm(self.time_content, self.title_content)
-
-    def show_add_page(self, widget):
-        # displays a popover
-        pop = Gtk.Popover()
-        # create a grid 
-        cont = Gtk.Grid()
-        # label for the text box
-        time_label = Gtk.Label('Time')
-        # textbox to enter time
-        self.time = Gtk.Entry()
         
-
-        # label for the title text box
-        title_label = Gtk.Label('Title')
-        # textbox to enter title of the alarm
-        self.title = Gtk.Entry()
-        
-        submit = Gtk.Button(label='submit')
-        submit.connect('clicked', self.add_alarm)
-        
-        cont.add(time_label)
-        cont.attach(self.time, 1, 0, 1, 1)
-        cont.attach(title_label, 0, 1, 1, 1)
-        cont.attach(self.title, 1, 1, 1, 1)
-        cont.attach(submit, 0, 2, 1, 1)
-        pop.add(cont)
-
-        pop.set_relative_to(self.add_but)
-        pop.show_all()
-        pop.popup()
 
 
     def about_app(self, widget):
