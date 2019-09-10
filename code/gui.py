@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -6,7 +8,7 @@ import alarm
 
 class MyWindow(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self, title="Pagus")
+        Gtk.Window.__init__(self)
         self.set_border_width(3)
         # set windows default size
         self.set_default_size(500, 200)
@@ -14,7 +16,7 @@ class MyWindow(Gtk.Window):
         self.set_resizable(False)
 
         # container to hold all item
-        self.main_container = Gtk.HBox()
+        self.main_container = Gtk.VBox()
         # add container to main window
         self.add(self.main_container)
 
@@ -52,8 +54,47 @@ class MyWindow(Gtk.Window):
         #     - remove alarm info from gui
         #     - remove alarm record from db
         # - else:
-        #     - sleep till its time 
+        #     - sleep till its time
+        #
 
+        # create a menu bar
+        headerbar = Gtk.HeaderBar()
+        # set the title of the header bar
+        headerbar.set_title('EA Alarm')
+        # show close button
+        headerbar.set_show_close_button(True)
+        # add menubar to main container
+        self.main_container.pack_start(headerbar, False, False, 0)
+
+        # add inner section of the app
+        inner_container = Gtk.VBox()
+        # create grid to hold the input section
+        input_section = Gtk.Grid()
+
+        # items of the input section
+        time = Gtk.Entry()
+        title = Gtk.Entry()
+        submit = Gtk.Button('Add')
+
+        # add placeholder for time and title
+        time.set_placeholder_text('Enter Time')
+        title.set_placeholder_text('Enter Title')
+
+        # add input items to grid
+        input_section.attach(time, 0, 0, 2, 1)
+        input_section.attach(title, 0, 1, 2, 1)
+        input_section.attach(submit, 2, 0, 1, 2)
+
+        # create a listbox to display the alarm info
+        gui_alarm_info = Gtk.ListBox()
+
+        # add input section to the inner container
+        inner_container.add(input_section)
+        # add gui_alarm_info to inner container
+        inner_container.add(gui_alarm_info)
+
+        # add inner container to the main container
+        self.main_container.pack_start(inner_container, True, True, 0)
 
         #/////////////////////////////////////////////
 
