@@ -5,6 +5,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 import json
 import alarm
+import sqlite3
 
 class MyWindow(Gtk.Window):
     def __init__(self):
@@ -21,7 +22,7 @@ class MyWindow(Gtk.Window):
         # set the headerbar as the titlebar of the window
         self.set_titlebar(headerbar)
         # set the title of the header bar
-        headerbar.set_title('EA Alarm')
+        headerbar.set_title('Boye Alarm')
         # show close button
         headerbar.set_show_close_button(True)
 
@@ -87,18 +88,43 @@ class MyWindow(Gtk.Window):
         self.input_section.attach(submit, 2, 0, 1, 2)
 
         # create a listbox to display the alarm info
-        gui_alarm_info = Gtk.ListBox()
+        self.gui_alarm_info = Gtk.ListBox()
 
         # add input section to the inner container
         inner_container.pack_start(self.input_section, False, True, 10)
         # add gui_alarm_info to inner container
-        inner_container.pack_start(gui_alarm_info, True, True, 10)
+        inner_container.pack_start(self.gui_alarm_info, True, True, 10)
 
         # add inner container to the main container
         self.main_container.pack_start(inner_container, True, True, 0)
 
-        #/////////////////////////////////////////////
 
+    def new_alarm(self, t, title):
+        """
+        Method to create a new alarm
+
+        PARAMETERS:
+        t - time the alarm is expected to sound
+        title - title / purpose of the new alarm
+        """
+        # set the alarm
+        alarm.AlarmThread(t, title)
+
+        # save the alarm details to db
+        db = sqlite3.connect('alarm_records.db')
+        # get a cursor object
+        cur = db.cursor()
+        # create a table if it doesn't exist
+        cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (
+            time TEXT PRIMARY KEY,
+            title TEXT
+        ) """)
+        # add alarm info to db
+        cur.execute(""" INSERT INTO schedules (time, title) VALUES (?)""", (t, title))
+        # commit changes
+        db.commit()
+        # add show alarm info in gui
+        self.gui_alarm_info.add()
         
 
 

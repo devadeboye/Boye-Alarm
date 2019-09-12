@@ -6,29 +6,48 @@ import json
 import sqlite3
 import os
 
+class InvalidInputError(Exception):
+    def __init__(self):
+        """
+        Thrown when an unexpected input was given
+        """
+        Exception.__init__(self)
+        
+
+class TimePassedError(Exception):
+    def __init__(self):
+        """
+        Thrown when time has elapsed
+        """
+        Exception.__init__(self)
+        
+
 class Alarm:
     """
     class alarm defines an alarm clock app with various
     functionalities.'
     """
     def __init__(self, t, title='nil'):
-        try:
-            self.title = title
+        self.title = title
+        # check if valid time format was entered
+        if len(t.split(':')) != 2:
+            raise InvalidInputError('Enter time separated by (:)'+\
+                ' e.g 10:00')
+        else:
             # split the time string and assign it to self.tm
-            self.tm = t.split(':') # time
+            self.tm = t.split(':')
+            # check if hours is valid
+            if len(self.tm[0]) != 2:
+                self.tm = None
+                raise InvalidInputError('Invalid input for hour!')
+            # check if minute is valid
+            elif len(self.tm[1]) != 2:
+                self.tm = None
+                raise InvalidInputError('Invalid input for minute!')
+            # min or secs must be < 60
+            elif int(self.tm[1]) < 60:
+                raise InvalidInputError('Mins or Secs must be less than 60')
 
-        # when an integer is passed as a time
-        except AttributeError:
-            print("Time (t) must be a string")
-
-        # when time is not enclosed in a quote
-        except SyntaxError:
-            print("invalid input! time(t) "+\
-                "and title must be a string.")
-
-        # when the title is not surrounded with a quote
-        except NameError:
-            print('title must be a string!')
 
     def proc(self):
         """
@@ -40,18 +59,14 @@ class Alarm:
 
         # compare current time with the entered time
         #
-        # min or secs must be < 60
-        assert(int(self.tm[1]) < 60)
         # if current time (h) > due time
         if now[3] > int(self.tm[0]):
-            raise ValueError("invalid time! That time "+\
-                "has passed.")
+            raise TimePassedError("That time has passed!")
 
         # hour is the same, but mins is lesser than current mins
         elif now[3] == int(self.tm[0]) and now[4] >\
             int(self.tm[1]):
-            raise ValueError("invalid time! That time "+\
-                "has passed.")
+            raise TimePassedError("That time has passed!")
 
         # hour and mins are equal
         elif now[3] == int(self.tm[0]) and now[4] ==\
@@ -120,47 +135,16 @@ class AlarmThread(threading.Thread):
         self.title = title
 
     def run(self):
-        try:
-            print(f'starting {self.title}!')
-            a = Alarm(self.time, self.title)
-            # process the time
-            a.proc()
-            # call the ringer
-            a.ring()
-            print(f'exiting {self.title}!')
-        except Exception as e:
-            print(e)
+        print(f'starting {self.title}!')
+        a = Alarm(self.time, self.title)
+        # process the time
+        a.proc()
+        # call the ringer
+        a.ring()
+        print(f'exiting {self.title}!')
 
 
-def add_alarm(t,title='nil'):
-    """
-    collects all necessary info needed to set the
-    alarm from the user.
 
-    PARAMETERS
-    t = time alarm should sound
-    title = title or name for the task/alarm
-    """
-    try:
-        # open file for reading
-        fr = open('record.json', 'r')
-        # load data
-        alarm_data = json.load(fr)
-
-        # add item to the dict
-        alarm_data[t] = title
-        # open file to write changes
-        fw = open('record.json', 'w')
-
-        # write the changes to file
-        json.dump(alarm_data, fw, indent=4)
-        # close file
-        fw.close()
-
-    except FileNotFoundError:
-        fw = open('record.json', 'w')
-        json.dump({t:title}, fw, indent=4)
-        fw.close()
 
 
 
