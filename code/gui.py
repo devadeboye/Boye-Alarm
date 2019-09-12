@@ -16,6 +16,44 @@ class MyWindow(Gtk.Window):
         # make window unresizeable
         self.set_resizable(False)
 
+        # create a headerbar
+        headerbar = Gtk.HeaderBar()
+        # set the headerbar as the titlebar of the window
+        self.set_titlebar(headerbar)
+        # set the title of the header bar
+        headerbar.set_title('EA Alarm')
+        # show close button
+        headerbar.set_show_close_button(True)
+
+        # create a menubutton
+        menu_but = Gtk.MenuButton()
+
+        # menu to be popped when menubutton is clicked
+        menu = Gtk.Menu()
+        # create a menu item
+        menu_item = Gtk.MenuItem()
+        # menu items are listed below
+        about = Gtk.Label('About')
+        # add items to menu item
+        #menu_item.add(about)
+        # add menu items to menu
+        menu.add(menu_item)
+
+        # popover
+        popover = Gtk.Popover()
+        popover.add(about)
+        popover.set_relative_to(menu_but)
+        
+
+
+        # set the menu that will be popped when clicked
+        menu_but.set_popover(popover)
+        # add menubutton tto headerbar
+        headerbar.pack_end(menu_but)
+
+
+        #---------- App's body section ---------
+        #  
         # container to hold all item
         self.main_container = Gtk.VBox()
         # add container to main window
@@ -25,48 +63,6 @@ class MyWindow(Gtk.Window):
         self.title = self.time = self.time_content =\
             self.title_content = None
         
-        #/////////////////////////////////////////////
-
-        # TASK ADDING ALGORITHM
-        # ------------------------ 
-        # - accept the parameters
-        # - if parameters are valid:
-        #     - set the alarm with the parameters
-        #     - add the alarm info to the gui
-        #     - add the alarm info to the db
-        # - else:
-        #     - raise an exception via a popup box stating
-        #       the error.
-        # 
-        # 
-        # ALGORITHM TO CONTROL WHAT TO DO ON LAUNCH
-        # -----------------------------------------
-        # - if there are item in the db:
-        #     - load them
-        #     - set alarm for them
-        #     - add their alarm info to the gui
-        # - else:
-        #     - raise alarm empty error as a popup
-        # 
-        # 
-        # ALARM TRIGGER ALGORITHM
-        # - if time == specified time:
-        #     - sound the alarm
-        #     - remove alarm info from gui
-        #     - remove alarm record from db
-        # - else:
-        #     - sleep till its time
-        #
-
-        # create a menu bar
-        headerbar = Gtk.HeaderBar()
-        # set the headerbar as the titlebar of the window
-        self.set_titlebar(headerbar)
-        # set the title of the header bar
-        headerbar.set_title('EA Alarm')
-        # show close button
-        headerbar.set_show_close_button(True)
-
         # add inner section of the app
         inner_container = Gtk.VBox()
         # create grid to hold the input section
@@ -133,3 +129,39 @@ win.connect("destroy", Gtk.main_quit)
 win.show_all()
 # start the GTK+ processing loop
 Gtk.main()
+
+
+
+
+#/////////////////////////////////////////////
+
+# TASK ADDING ALGORITHM
+# ------------------------ 
+# - accept the parameters
+# - if parameters are valid:
+#     - set the alarm with the parameters
+#     - add the alarm info to the gui
+#     - add the alarm info to the db
+# - else:
+#     - raise an exception via a popup box stating
+#       the error.
+# 
+# 
+# ALGORITHM TO CONTROL WHAT TO DO ON LAUNCH
+# -----------------------------------------
+# - if there are item in the db:
+#     - load them
+#     - set alarm for them
+#     - add their alarm info to the gui
+# - else:
+#     - raise alarm empty error as a popup
+# 
+# 
+# ALARM TRIGGER ALGORITHM
+# - if time == specified time:
+#     - sound the alarm
+#     - remove alarm info from gui
+#     - remove alarm record from db
+# - else:
+#     - sleep till its time
+#
