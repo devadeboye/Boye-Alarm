@@ -10,8 +10,9 @@ class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self)
         self.set_border_width(3)
+        #self.set_decorated(False)
         # set windows default size
-        self.set_default_size(500, 200)
+        self.set_default_size(450, 250)
         # make window unresizeable
         self.set_resizable(False)
 
@@ -59,39 +60,43 @@ class MyWindow(Gtk.Window):
 
         # create a menu bar
         headerbar = Gtk.HeaderBar()
+        # set the headerbar as the titlebar of the window
+        self.set_titlebar(headerbar)
         # set the title of the header bar
         headerbar.set_title('EA Alarm')
         # show close button
         headerbar.set_show_close_button(True)
-        # add menubar to main container
-        self.main_container.pack_start(headerbar, False, False, 0)
 
         # add inner section of the app
         inner_container = Gtk.VBox()
         # create grid to hold the input section
-        input_section = Gtk.Grid()
+        self.input_section = Gtk.Grid()
 
         # items of the input section
-        time = Gtk.Entry()
-        title = Gtk.Entry()
+        self.time = Gtk.Entry()
+        self.title = Gtk.Entry()
         submit = Gtk.Button('Add')
 
+        # set the size of the entry box
+        self.time.set_width_chars (45)
+        self.title.set_width_chars (45)
+
         # add placeholder for time and title
-        time.set_placeholder_text('Enter Time')
-        title.set_placeholder_text('Enter Title')
+        self.time.set_placeholder_text('Enter Time')
+        self.title.set_placeholder_text('Enter Title')
 
         # add input items to grid
-        input_section.attach(time, 0, 0, 2, 1)
-        input_section.attach(title, 0, 1, 2, 1)
-        input_section.attach(submit, 2, 0, 1, 2)
+        self.input_section.attach(self.time, 0, 0, 2, 1)
+        self.input_section.attach(self.title, 0, 1, 2, 1)
+        self.input_section.attach(submit, 2, 0, 1, 2)
 
         # create a listbox to display the alarm info
         gui_alarm_info = Gtk.ListBox()
 
         # add input section to the inner container
-        inner_container.add(input_section)
+        inner_container.pack_start(self.input_section, False, True, 10)
         # add gui_alarm_info to inner container
-        inner_container.add(gui_alarm_info)
+        inner_container.pack_start(gui_alarm_info, True, True, 10)
 
         # add inner container to the main container
         self.main_container.pack_start(inner_container, True, True, 0)
