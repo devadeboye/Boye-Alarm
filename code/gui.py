@@ -73,6 +73,7 @@ class MyWindow(Gtk.Window):
         self.time = Gtk.Entry()
         self.title = Gtk.Entry()
         submit = Gtk.Button('Add')
+        submit.connect("clicked", self.new_alarm)
 
         # set the size of the entry box
         self.time.set_width_chars (45)
@@ -98,33 +99,73 @@ class MyWindow(Gtk.Window):
         # add inner container to the main container
         self.main_container.pack_start(inner_container, True, True, 0)
 
+        
 
-    def new_alarm(self, t, title):
+        # show all schedules if any
+        self.show_and_set_alarms()
+
+
+    def new_alarm(self, widget):
         """
         Method to create a new alarm
-
-        PARAMETERS:
-        t - time the alarm is expected to sound
-        title - title / purpose of the new alarm
         """
-        # set the alarm
-        alarm.AlarmThread(t, title)
+        # capture user's entry
+        self.time_content = str(self.time.get_text())
+        self.title_content =str(self.title.get_text())
+
+        #--------- input validation codes -----------
+        wwwww
 
         # save the alarm details to db
         db = sqlite3.connect('alarm_records.db')
         # get a cursor object
         cur = db.cursor()
         # create a table if it doesn't exist
-        cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (
-            time TEXT PRIMARY KEY,
-            title TEXT
-        ) """)
+        cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
         # add alarm info to db
-        cur.execute(""" INSERT INTO schedules (time, title) VALUES (?)""", (t, title))
+        cur.execute(""" INSERT INTO schedules (time, title) VALUES (?, ?)""", (self.time_content, self.title_content))
         # commit changes
         db.commit()
-        # add show alarm info in gui
-        self.gui_alarm_info.add()
+
+        print('alarm added')
+
+        # show all schedules if any
+        self.show_and_set_alarms()
+
+
+    def show_and_set_alarms(self):
+        """
+        show the list of alarms in record
+        """
+        # connect to the db
+        db = sqlite3.connect('alarm_records.db')
+        # get cursor object
+        cur = db.cursor()
+        # check db for records
+        try:
+            cur.execute('SELECT * FROM schedules')
+            db.commit()
+            schedules = cur.fetchall()
+            print(schedules)
+        except Exception:
+            # create a table if it doesn't exist
+            cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
+            db.commit()
+            return(0)
+
+        for item in schedules:
+            try:
+                # set the alarm
+                alarm.AlarmThread(item[1], item[2]).start()
+
+                l = Gtk.Label()
+                # left justification
+                l.set_justify(Gtk.Justification.LEFT)
+
+                # style the text using pango markup
+                l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
+                # add show alarm info in gui
+                self.gui_alarm_info.add(l)
         
 
 
@@ -165,9 +206,8 @@ Gtk.main()
 # ------------------------ 
 # - accept the parameters
 # - if parameters are valid:
-#     - set the alarm with the parameters
-#     - add the alarm info to the gui
-#     - add the alarm info to the db
+#     - write the input from users into db
+#     - call on function to update the UI 
 # - else:
 #     - raise an exception via a popup box stating
 #       the error.

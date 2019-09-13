@@ -1,8 +1,9 @@
+#!/usr/bin/python3
+
 import time
 from eaTime import Timing
 import threading
 from playsound import playsound
-import json
 import sqlite3
 import os
 
@@ -27,12 +28,13 @@ class Alarm:
     class alarm defines an alarm clock app with various
     functionalities.'
     """
-    def __init__(self, t, title='nil'):
+    def __init__(self, t, title):
         self.title = title
         # check if valid time format was entered
         if len(t.split(':')) != 2:
-            raise InvalidInputError('Enter time separated by (:)'+\
-                ' e.g 10:00')
+            print('the length is', len(t.split(':')))
+            raise InvalidInputError('Enter time separated by (:) e.g 10:00')
+            #raise ValueError('Enter time separated by (:) e.g 10:00')
         else:
             # split the time string and assign it to self.tm
             self.tm = t.split(':')
@@ -45,7 +47,7 @@ class Alarm:
                 self.tm = None
                 raise InvalidInputError('Invalid input for minute!')
             # min or secs must be < 60
-            elif int(self.tm[1]) < 60:
+            elif int(self.tm[1]) > 60:
                 raise InvalidInputError('Mins or Secs must be less than 60')
 
 
@@ -152,11 +154,6 @@ class AlarmThread(threading.Thread):
 
 # ---------------- test -------------
 if __name__ == "__main__":
-    #AlarmThread('11:60', 't1').start()
-    #AlarmThread('17:19', 't2').start()
-    add_alarm("9:40","wake up")
-    """try:
-        AlarmThread('20:35', 'cooking').start()
-    except AssertionError:
-        print('oh no!')"""
+    AlarmThread('20:02', 't1').start()
+    AlarmThread('19:59', 't2').start()
     
