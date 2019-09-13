@@ -68,7 +68,7 @@ class MyWindow(Gtk.Window):
             self.title_content = None
         
         # add inner section of the app
-        inner_container = Gtk.VBox()
+        self.inner_container = Gtk.VBox()
         # create grid to hold the input section
         self.input_section = Gtk.Grid()
 
@@ -92,15 +92,15 @@ class MyWindow(Gtk.Window):
         self.input_section.attach(submit, 2, 0, 1, 2)
 
         # create a listbox to display the alarm info
-        self.gui_alarm_info = Gtk.ListBox()
+        #self.gui_alarm_info = Gtk.ListBox()
 
         # add input section to the inner container
-        inner_container.pack_start(self.input_section, False, True, 10)
+        self.inner_container.pack_start(self.input_section, False, True, 10)
         # add gui_alarm_info to inner container
-        inner_container.pack_start(self.gui_alarm_info, True, True, 10)
+        #self.inner_container.pack_start(self.gui_alarm_info, True, True, 10)
 
         # add inner container to the main container
-        self.main_container.pack_start(inner_container, True, True, 0)
+        self.main_container.pack_start(self.inner_container, True, True, 0)
 
         
 
@@ -162,6 +162,8 @@ class MyWindow(Gtk.Window):
         cur.execute(""" INSERT INTO schedules (time, title) VALUES (?, ?)""", (self.time_content, self.title_content))
         # commit changes
         db.commit()
+        # close the db
+        db.close()
 
         print('alarm added')
 
@@ -173,6 +175,10 @@ class MyWindow(Gtk.Window):
         """
         show the list of alarms in record
         """
+        self.gui_alarm_info = Gtk.ListBox()
+        # add gui_alarm_info to inner container
+        self.inner_container.pack_start(self.gui_alarm_info, True, True, 10)
+
         # get current time
         now = time_module.localtime()
 
