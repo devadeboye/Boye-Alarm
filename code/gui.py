@@ -6,6 +6,9 @@ from gi.repository import Gtk
 import json
 import alarm
 import sqlite3
+import time as time_module
+# import some error classes
+from alarm import TimePassedError, InvalidInputError
 
 class MyWindow(Gtk.Window):
     def __init__(self):
@@ -113,9 +116,42 @@ class MyWindow(Gtk.Window):
         self.time_content = str(self.time.get_text())
         self.title_content =str(self.title.get_text())
 
-        #--------- input validation codes -----------
-        wwwww
+        # get current time as a tuple
+        now = time_module.localtime()
 
+        #--------- input validation codes -----------
+        test_time = ''
+        test_time += self.time_content
+        # check if valid time format was entered
+        if len(test_time.split(':')) != 2:
+            print('the length is', len(test_time.split(':')))
+            raise InvalidInputError('Enter time separated by (:) e.g 10:00')
+            #raise ValueError('Enter time separated by (:) e.g 10:00')
+        else:
+            # split the time string and assign it to test_time
+            test_time = test_time.split(':')
+            # check if hours is valid
+            if len(test_time[0]) != 2:
+                test_time = None
+                raise InvalidInputError('Invalid input for hour!')
+            # check if minute is valid
+            elif len(test_time[1]) != 2:
+                self.tm = None
+                raise InvalidInputError('Invalid input for minute!')
+            # min or secs must be < 60
+            elif int(test_time[1]) > 60:
+                raise InvalidInputError('Mins or Secs must be less than 60')
+            # if current time (h) > due time
+            elif now[3] > int(test_time[0]):
+                raise TimePassedError("That time has passed!")
+
+            # hour is the same, but mins is lesser than current mins
+            elif now[3] == int(test_time[0]) and now[4] >\
+                int(test_time[1]):
+                raise TimePassedError("That time has passed!")
+
+        #------- validation codes ends here ---------
+        print(f'This is what i wanna save {self.time_content}\n\n')
         # save the alarm details to db
         db = sqlite3.connect('alarm_records.db')
         # get a cursor object
@@ -154,18 +190,17 @@ class MyWindow(Gtk.Window):
             return(0)
 
         for item in schedules:
-            try:
-                # set the alarm
-                alarm.AlarmThread(item[1], item[2]).start()
+            # set the alarm
+            alarm.AlarmThread(item[1], item[2]).start()
 
-                l = Gtk.Label()
-                # left justification
-                l.set_justify(Gtk.Justification.LEFT)
+            l = Gtk.Label()
+            # left justification
+            l.set_justify(Gtk.Justification.LEFT)
 
-                # style the text using pango markup
-                l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
-                # add show alarm info in gui
-                self.gui_alarm_info.add(l)
+            # style the text using pango markup
+            l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
+            # add show alarm info in gui
+            self.gui_alarm_info.add(l)
         
 
 

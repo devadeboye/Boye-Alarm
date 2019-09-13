@@ -30,26 +30,7 @@ class Alarm:
     """
     def __init__(self, t, title):
         self.title = title
-        # check if valid time format was entered
-        if len(t.split(':')) != 2:
-            print('the length is', len(t.split(':')))
-            raise InvalidInputError('Enter time separated by (:) e.g 10:00')
-            #raise ValueError('Enter time separated by (:) e.g 10:00')
-        else:
-            # split the time string and assign it to self.tm
-            self.tm = t.split(':')
-            # check if hours is valid
-            if len(self.tm[0]) != 2:
-                self.tm = None
-                raise InvalidInputError('Invalid input for hour!')
-            # check if minute is valid
-            elif len(self.tm[1]) != 2:
-                self.tm = None
-                raise InvalidInputError('Invalid input for minute!')
-            # min or secs must be < 60
-            elif int(self.tm[1]) > 60:
-                raise InvalidInputError('Mins or Secs must be less than 60')
-
+        self.tm = t
 
     def proc(self):
         """
@@ -58,20 +39,13 @@ class Alarm:
         """
         # get current time as a tuple
         now = time.localtime()
+        # split the time string and assign it to self.time_content
+        self.tm = self.tm.split(':')
 
         # compare current time with the entered time
         #
-        # if current time (h) > due time
-        if now[3] > int(self.tm[0]):
-            raise TimePassedError("That time has passed!")
-
-        # hour is the same, but mins is lesser than current mins
-        elif now[3] == int(self.tm[0]) and now[4] >\
-            int(self.tm[1]):
-            raise TimePassedError("That time has passed!")
-
         # hour and mins are equal
-        elif now[3] == int(self.tm[0]) and now[4] ==\
+        if now[3] == int(self.tm[0]) and now[4] ==\
             int(self.tm[1]):
             # set sleep duration to zero
             sleep_dur = 0
