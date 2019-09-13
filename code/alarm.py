@@ -81,7 +81,11 @@ class Alarm:
                 " {st[1]} min(s) time")
         
         # sleep till its time to sound the alarm
-        time.sleep(sleep_dur)
+        print(f'\nThis is the sleep time {sleep_dur} \n\n')
+        try:
+            time.sleep(sleep_dur)
+        except ValueError as error:
+            print(error)
         
     def ring(self):
         """

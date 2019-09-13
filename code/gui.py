@@ -173,6 +173,9 @@ class MyWindow(Gtk.Window):
         """
         show the list of alarms in record
         """
+        # get current time
+        now = time_module.localtime()
+
         # connect to the db
         db = sqlite3.connect('alarm_records.db')
         # get cursor object
@@ -182,14 +185,39 @@ class MyWindow(Gtk.Window):
             cur.execute('SELECT * FROM schedules')
             db.commit()
             schedules = cur.fetchall()
-            print(schedules)
+            #print(schedules) #---->
+            
+            # empty set to hold items that are to be deleted
+            to_be_deleted = set()
+
+            # gather expired items in schedule by id and
+            # delete them from the db
+            for n in schedules:
+                aa = n[1].split(':')
+                if now[3] > int(aa[0]):
+                    to_be_deleted.add(n[0])
+                    print(f'{now[3]} <<------>> {int(aa[0])} ------ {n}') #---->
+                if now[3] == int(aa[0]) and now[4] > int(aa[1]):
+                    to_be_deleted.add(n[0])
+                    print(f'{now[3]} ---------- {aa[1]}') #---->
+            print(f'\n\n These items are to be deleted\n {to_be_deleted}\n\n') #---->
+
+            # delete expired items
+            for identity in to_be_deleted:
+                cur.execute('DELETE FROM schedules WHERE id = ?', (identity,))
+            db.commit()
+
+            # recollect items from the db
+            cur.execute('SELECT * FROM schedules')
+            valid_schedules = cur.fetchall()
+            print(valid_schedules) #---->
         except Exception:
             # create a table if it doesn't exist
             cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
             db.commit()
             return(0)
 
-        for item in schedules:
+        for item in valid_schedules:
             # set the alarm
             alarm.AlarmThread(item[1], item[2]).start()
 
@@ -201,6 +229,9 @@ class MyWindow(Gtk.Window):
             l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
             # add show alarm info in gui
             self.gui_alarm_info.add(l)
+        
+        # close the db
+        db.close()
         
 
 
