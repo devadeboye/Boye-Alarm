@@ -29,12 +29,31 @@ class MyWindow(Gtk.Window):
         # show close button
         headerbar.set_show_close_button(True)
 
+        #-------- menu section starts here -------
+        #  
         # create a menubutton
         menu_but = Gtk.MenuButton()
-       
+        # create a popover
+        popover = Gtk.Popover()
 
-        # add menubutton tto headerbar
+        # create a grid to hold the popover item
+        popover_grid = Gtk.Grid()
+        # popover items
+        about_but = Gtk.Button('About')
+        # connect button to callback function
+        about_but.connect('clicked', self.about_app)
+        # add about button to the grid
+        popover_grid.add(about_but)
+        popover_grid.show_all()
+
+        # add grid to popover
+        popover.add(popover_grid)
+        # set popover to be shown when menu button is clicked
+        menu_but.set_popover(popover)
+
+        # add menubutton to headerbar
         headerbar.pack_end(menu_but)
+        #----------- menu section ends here ----------
 
 
         #---------- App's body section ---------
@@ -233,7 +252,7 @@ class MyWindow(Gtk.Window):
     def about_app(self, widget):
         info = Gtk.AboutDialog()
         info.set_transient_for(self)
-        info.set_program_name('Pagus')
+        info.set_program_name('Boye Alarm')
         info.set_version('1.0')
         info.set_comments ('An alarm clock app for PC')
         info.set_copyright('Copyright © 2019 Emmanuel Adeboye')
