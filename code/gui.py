@@ -31,27 +31,8 @@ class MyWindow(Gtk.Window):
 
         # create a menubutton
         menu_but = Gtk.MenuButton()
+       
 
-        # menu to be popped when menubutton is clicked
-        menu = Gtk.Menu()
-        # create a menu item
-        menu_item = Gtk.MenuItem()
-        # menu items are listed below
-        about = Gtk.Label('About')
-        # add items to menu item
-        #menu_item.add(about)
-        # add menu items to menu
-        menu.add(menu_item)
-
-        # popover
-        popover = Gtk.Popover()
-        popover.add(about)
-        popover.set_relative_to(menu_but)
-        
-
-
-        # set the menu that will be popped when clicked
-        menu_but.set_popover(popover)
         # add menubutton tto headerbar
         headerbar.pack_end(menu_but)
 
@@ -167,6 +148,11 @@ class MyWindow(Gtk.Window):
 
         print('alarm added')
 
+        # delete and reload the listbox
+        self.gui_alarm_info.destroy()
+        # clear the content of the  entry boxes
+        self.time.set_text('')
+        self.title.set_text('')
         # show all schedules if any
         self.show_and_set_alarms()
 
@@ -238,6 +224,9 @@ class MyWindow(Gtk.Window):
         
         # close the db
         db.close()
+
+        # show the listbox
+        self.gui_alarm_info.show_all()
         
 
 
