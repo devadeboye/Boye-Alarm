@@ -7,6 +7,8 @@ import json
 import alarm
 import sqlite3
 import time as time_module
+import getOs
+import os
 # import some error classes
 from alarm import TimePassedError, InvalidInputError
 
@@ -91,18 +93,11 @@ class MyWindow(Gtk.Window):
         self.input_section.attach(self.title, 0, 1, 2, 1)
         self.input_section.attach(submit, 2, 0, 1, 2)
 
-        # create a listbox to display the alarm info
-        #self.gui_alarm_info = Gtk.ListBox()
-
         # add input section to the inner container
         self.inner_container.pack_start(self.input_section, False, True, 10)
-        # add gui_alarm_info to inner container
-        #self.inner_container.pack_start(self.gui_alarm_info, True, True, 10)
 
         # add inner container to the main container
-        self.main_container.pack_start(self.inner_container, True, True, 0)
-
-        
+        self.main_container.pack_start(self.inner_container, True, True, 0)       
 
         # show all schedules if any
         self.show_and_set_alarms()
@@ -131,7 +126,7 @@ class MyWindow(Gtk.Window):
             # split the time string and assign it to test_time
             test_time = test_time.split(':')
             # check if hours is valid
-            if len(test_time[0]) != 2:
+            if len(test_time[0]) > 2 or len(test_time[0]) < 1:
                 test_time = None
                 raise InvalidInputError('Invalid input for hour!')
             # check if minute is valid
@@ -152,101 +147,178 @@ class MyWindow(Gtk.Window):
 
         #------- validation codes ends here ---------
         print(f'This is what i wanna save {self.time_content}\n\n')
-        # save the alarm details to db
-        db = sqlite3.connect('alarm_records.db')
-        # get a cursor object
-        cur = db.cursor()
-        # create a table if it doesn't exist
-        cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
-        # add alarm info to db
-        cur.execute(""" INSERT INTO schedules (time, title) VALUES (?, ?)""", (self.time_content, self.title_content))
-        # commit changes
-        db.commit()
-        # close the db
-        db.close()
+        
+        # get the name of the current logged in user
+        logged_in_user = os.getlogin()
 
-        print('alarm added')
+        # check if directory exist
+        try:
+            if getOs.get_platform() == 'linux':
+                # create a db
+                db = sqlite3.connect(f'/home/{logged_in_user}/Documents/.BoyeAlarm/alarm_records.db')
+            elif getOs.get_platform() == 'Windows':
+                # create a db
+                db = sqlite3.connect(f'C:/users/{logged_in_user}/.BoyeAlarm/alarm_records.db')
+        
+            # get a cursor object
+            cur = db.cursor()
+            # create a table if it doesn't exist
+            cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
+            # add alarm info to db
+            cur.execute(""" INSERT INTO schedules (time, title) VALUES (?, ?)""", (self.time_content, self.title_content))
+            # commit changes
+            db.commit()
+            # close the db
+            db.close()
 
-        # delete and reload the listbox
-        self.gui_alarm_info.destroy()
-        # clear the content of the  entry boxes
-        self.time.set_text('')
-        self.title.set_text('')
-        # show all schedules if any
-        self.show_and_set_alarms()
+            print('alarm added')
+
+            # delete and reload the listbox
+            self.scrolled_window.destroy()
+            # clear the content of the  entry boxes
+            self.time.set_text('')
+            self.title.set_text('')
+            # show all schedules if any
+            self.show_and_set_alarms()
+        except sqlite3.OperationalError:
+            # check for os type
+            if getOs.get_platform() == 'linux':
+                # create a directory
+                os.mkdir(f'/home/{logged_in_user}/Documents/.BoyeAlarm/')
+                # create a db
+                db = sqlite3.connect(f'/home/{logged_in_user}/Documents/.BoyeAlarm/alarm_records.db')
+            elif getOs.get_platform() == 'Windows':
+                # create a directory
+                os.mkdir(f'C:/users/{logged_in_user}/.BoyeAlarm/')
+                # create a db
+                db = sqlite3.connect(f'C:/users/{logged_in_user}/.BoyeAlarm/alarm_records.db')
+
+            # save the alarm details to db
+            #db = sqlite3.connect('alarm_records.db')
+            # get a cursor object
+            cur = db.cursor()
+            # create a table if it doesn't exist
+            cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
+            # add alarm info to db
+            cur.execute(""" INSERT INTO schedules (time, title) VALUES (?, ?)""", (self.time_content, self.title_content))
+            # commit changes
+            db.commit()
+            # close the db
+            db.close()
+
+            print('alarm added')
+
+            # delete and reload the listbox
+            self.scrolled_window.destroy()
+            # clear the content of the  entry boxes
+            self.time.set_text('')
+            self.title.set_text('')
+            # show all schedules if any
+            self.show_and_set_alarms()
 
 
     def show_and_set_alarms(self):
         """
         show the list of alarms in record
         """
+        # scrolled window to hold the listbox
+        self.scrolled_window = Gtk.ScrolledWindow()
+        # create a listbox to hold the alarm schedules
         self.gui_alarm_info = Gtk.ListBox()
-        # add gui_alarm_info to inner container
-        self.inner_container.pack_start(self.gui_alarm_info, True, True, 10)
+        # add listbox to scrolled window
+        self.scrolled_window.add(self.gui_alarm_info)
+        # add scrolled window to inner container
+        self.inner_container.pack_start(self.scrolled_window, True, True, 10)
 
         # get current time
         now = time_module.localtime()
 
-        # connect to the db
-        db = sqlite3.connect('alarm_records.db')
-        # get cursor object
-        cur = db.cursor()
-        # check db for records
+#----------------------------------------------------------
+
+        # get the name of the current logged in user
+        logged_in_user = os.getlogin()
+
+        # check if directory exist
         try:
-            cur.execute('SELECT * FROM schedules')
-            db.commit()
-            schedules = cur.fetchall()
-            #print(schedules) #---->
+            if getOs.get_platform() == 'linux':
+                # create a db
+                db = sqlite3.connect(f'/home/{logged_in_user}/Documents/.BoyeAlarm/alarm_records.db')
+            elif getOs.get_platform() == 'Windows':
+                # create a db
+                db = sqlite3.connect(f'C:/users/{logged_in_user}/.BoyeAlarm/alarm_records.db')
+
+            # get cursor object
+            cur = db.cursor()
+            # check db for records
+            try:
+                cur.execute('SELECT * FROM schedules')
+                db.commit()
+                schedules = cur.fetchall()
+                #print(schedules) #---->
+                
+                # empty set to hold items that are to be deleted
+                to_be_deleted = set()
+
+                # gather expired items in schedule by id and
+                # delete them from the db
+                for n in schedules:
+                    aa = n[1].split(':')
+                    if now[3] > int(aa[0]):
+                        to_be_deleted.add(n[0])
+                        print(f'{now[3]} <<------>> {int(aa[0])} ------ {n}') #---->
+                    if now[3] == int(aa[0]) and now[4] > int(aa[1]):
+                        to_be_deleted.add(n[0])
+                        print(f'{now[3]} ---------- {aa[1]}') #---->
+                print(f'\n\n These items are to be deleted\n {to_be_deleted}\n\n') #---->
+
+                # delete expired items
+                for identity in to_be_deleted:
+                    cur.execute('DELETE FROM schedules WHERE id = ?', (identity,))
+                db.commit()
+
+                # recollect items from the db
+                cur.execute('SELECT * FROM schedules')
+                valid_schedules = cur.fetchall()
+                print(valid_schedules) #---->
+            except Exception:
+                # create a table if it doesn't exist
+                cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
+                db.commit()
+                return(0)
+
+            for item in valid_schedules:
+                # set the alarm
+                alarm.AlarmThread(item[1], item[2]).start()
+
+                l = Gtk.Label()
+                # left justification
+                l.set_justify(Gtk.Justification.LEFT)
+                # horizontal alignment of the text in the label
+                l.set_xalign(0)
+
+                # style the text using pango markup
+                l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
+                # add show alarm info in gui
+                self.gui_alarm_info.add(l)
             
-            # empty set to hold items that are to be deleted
-            to_be_deleted = set()
+            # close the db
+            db.close()
 
-            # gather expired items in schedule by id and
-            # delete them from the db
-            for n in schedules:
-                aa = n[1].split(':')
-                if now[3] > int(aa[0]):
-                    to_be_deleted.add(n[0])
-                    print(f'{now[3]} <<------>> {int(aa[0])} ------ {n}') #---->
-                if now[3] == int(aa[0]) and now[4] > int(aa[1]):
-                    to_be_deleted.add(n[0])
-                    print(f'{now[3]} ---------- {aa[1]}') #---->
-            print(f'\n\n These items are to be deleted\n {to_be_deleted}\n\n') #---->
-
-            # delete expired items
-            for identity in to_be_deleted:
-                cur.execute('DELETE FROM schedules WHERE id = ?', (identity,))
-            db.commit()
-
-            # recollect items from the db
-            cur.execute('SELECT * FROM schedules')
-            valid_schedules = cur.fetchall()
-            print(valid_schedules) #---->
-        except Exception:
-            # create a table if it doesn't exist
-            cur.execute(""" CREATE TABLE IF NOT EXISTS schedules (id INTEGER PRIMARY KEY, time TEXT, title TEXT) """)
-            db.commit()
-            return(0)
-
-        for item in valid_schedules:
-            # set the alarm
-            alarm.AlarmThread(item[1], item[2]).start()
-
-            l = Gtk.Label()
-            # left justification
-            l.set_justify(Gtk.Justification.LEFT)
-
-            # style the text using pango markup
-            l.set_markup(f"<span size='x-large'><b>{item[1]}</b></span>\n<small>{item[2]}</small>")
-            # add show alarm info in gui
-            self.gui_alarm_info.add(l)
-        
-        # close the db
-        db.close()
-
-        # show the listbox
-        self.gui_alarm_info.show_all()
-        
+            # show the listbox
+            self.scrolled_window.show_all()
+          
+        except sqlite3.OperationalError:
+            # check for os type
+            if getOs.get_platform() == 'linux':
+                # create a directory
+                os.mkdir(f'/home/{logged_in_user}/Documents/.BoyeAlarm/')
+                # create a db
+                db = sqlite3.connect(f'/home/{logged_in_user}/Documents/.BoyeAlarm/alarm_records.db')
+            elif getOs.get_platform() == 'Windows':
+                # create a directory
+                os.mkdir(f'C:/users/{logged_in_user}/.BoyeAlarm/')
+                # create a db
+                db = sqlite3.connect(f'C:/users/{logged_in_user}/.BoyeAlarm/alarm_records.db')
 
 
     def about_app(self, widget):
