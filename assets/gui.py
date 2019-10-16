@@ -3,7 +3,6 @@
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
-import json
 import alarm
 import sqlite3
 import time as time_module
