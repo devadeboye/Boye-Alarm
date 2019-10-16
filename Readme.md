@@ -1,1 +1,0 @@
-Pagus is a simple Alarm app for Pc.
