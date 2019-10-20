@@ -78,7 +78,7 @@ class Alarm:
             st = Timing().sh(sleep_dur, r='t')
             # Tell the user when the alarm will sound
             print(f"Alarm will sound in {st[0]} hour(s)"+\
-                " {st[1]} min(s) time")
+                f" {st[1]} min(s) time")
         
         # sleep till its time to sound the alarm
         print(f'\nThis is the sleep time {sleep_dur} \n\n')

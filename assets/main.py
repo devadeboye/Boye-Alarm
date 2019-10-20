@@ -218,7 +218,8 @@ class MyWindow(Gtk.Window):
 
     def show_and_set_alarms(self):
         """
-        show the list of alarms in record
+        start the available alarms and show them in the
+        GUI
         """
         # scrolled window to hold the listbox
         self.scrolled_window = Gtk.ScrolledWindow()
