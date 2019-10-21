@@ -94,7 +94,7 @@ class Alarm:
         playsound('old-fashioned-school-bell-daniel_simon.wav')
 
 
-class AlarmThread(threading.Thread):
+class AlarmThread(threading.Timer):
     """
     Makes running the Alarm class possible. it accepts
     two arguments:

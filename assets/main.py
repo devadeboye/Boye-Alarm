@@ -3,13 +3,34 @@
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
-import alarm
+#import alarm
 import sqlite3
 import time as time_module
 import getOs
 import os
-# import some error classes
-from alarm import TimePassedError, InvalidInputError
+from eaTime import Timing
+from threading import Timer
+from playsound import playsound
+
+def ring():
+    """
+    ring if current time is equal to due_time
+    """
+    playsound('old-fashioned-school-bell-daniel_simon.wav')
+
+class InvalidInputError(Exception):
+    """
+    Thrown when an unexpected input was given
+    """
+    pass
+        
+
+class TimePassedError(Exception):
+    """
+    Thrown when time has elapsed
+    """
+    pass
+        
 
 class MyWindow(Gtk.Window):
     def __init__(self):
@@ -287,8 +308,31 @@ class MyWindow(Gtk.Window):
                 return(0)
 
             for item in valid_schedules:
+                #------ start of code calculating wait time -------
+                # get current time as a tuple
+                now = time_module.localtime()
+                # split the time string for easy calculation
+                alarm_time = item[1].split(':')
+                # compare current time with alarm time
+                #
+                # hour and mins are equal
+                if now[3] == int(alarm_time[0]) and now[4] ==\
+                    int(alarm_time[1]):
+                    # set sleep duration to zero
+                    sleep_dur = 0
+                # if current time > due time
+                else:
+                    # compare the time
+                    h = int(alarm_time[0]) - now[3] # hour
+                    m = int(alarm_time[1]) - now[4] # minutes
+                    # convert h and m to seconds
+                    sleep_dur = Timing().hs(h) + Timing().ms(m)
+                #------ end of code calculating wait time -----
+                
+                # run action in a thread
+                Timer(sleep_dur, ring).start()
                 # set the alarm
-                alarm.AlarmThread(item[1], item[2]).start()
+                #alarm.AlarmThread(item[1], item[2]).start()
 
                 l = Gtk.Label()
                 # left justification
