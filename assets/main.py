@@ -11,6 +11,7 @@ import os
 from eaTime import Timing
 from threading import Timer
 from playsound import playsound
+import threading
 
 def ring():
     """
@@ -329,10 +330,8 @@ class MyWindow(Gtk.Window):
                     sleep_dur = Timing().hs(h) + Timing().ms(m)
                 #------ end of code calculating wait time -----
                 
-                # run action in a thread
+                #--------- run action in a thread -----------
                 Timer(sleep_dur, ring).start()
-                # set the alarm
-                #alarm.AlarmThread(item[1], item[2]).start()
 
                 l = Gtk.Label()
                 # left justification
@@ -384,10 +383,25 @@ class MyWindow(Gtk.Window):
         info.destroy()
 
 
+def stop_thread(widget, something):
+    """
+    destroy all thread when app quit
+    """
+    my_threads = threading.enumerate()
+    print(my_threads)
+    for t in my_threads:
+        if t.is_alive():
+            try:
+                t.cancel()
+            except AttributeError:
+                pass
+    # quit the main window
+    Gtk.main_quit()
+
 # create an instance of my window
 win = MyWindow()
 # connect to the window's delete event
-win.connect("destroy", Gtk.main_quit)
+win.connect("delete-event", stop_thread)
 # display the window
 win.show_all()
 # start the GTK+ processing loop
